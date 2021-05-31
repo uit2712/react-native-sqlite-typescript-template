@@ -18,5 +18,10 @@
   "bugs": {
     "url": "https://github.com/uit2712/react-native-sqlite-typescript-template/issues"
   },
-  "homepage": "https://github.com/uit2712/react-native-sqlite-typescript-template#readme"
+  "homepage": "https://github.com/uit2712/react-native-sqlite-typescript-template#readme",
+  "devDependencies": {
+    "@types/react": "^17.0.8",
+    "@types/react-native": "^0.64.8",
+    "typescript": "^4.3.2"
+  }
 }

@@ -1,0 +1,22 @@
+{
+  "name": "react-native-sqlite-typescript-template",
+  "version": "0.1.0",
+  "description": "A template for sqlite in react-native using typescript",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uit2712/react-native-sqlite-typescript-template.git"
+  },
+  "keywords": [
+    "123"
+  ],
+  "author": "uit2712",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/uit2712/react-native-sqlite-typescript-template/issues"
+  },
+  "homepage": "https://github.com/uit2712/react-native-sqlite-typescript-template#readme"
+}

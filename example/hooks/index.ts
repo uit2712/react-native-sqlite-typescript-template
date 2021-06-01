@@ -1,9 +1,8 @@
-import React from "react";
-import { IResponseSQLiteHelper } from "../helpers";
-import { keys } from 'ts-transformer-keys';
+import React from 'react';
+import { IResponseSQLiteHelper } from '../helpers';
 
 export interface IPerson {
-    id: number;
+    id?: number;
     name: string;
     age: number;
 }

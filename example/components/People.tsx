@@ -1,10 +1,17 @@
 import * as React from 'react';
-import { FlatList, } from 'react-native';
+import {
+    FlatList,
+    TextInput,
+    TouchableOpacity,
+    View,
+    Text,
+    ToastAndroid
+} from 'react-native';
 import { SQLiteContext } from '../helpers';
 import { IPerson, useGetPeople } from '../hooks';
 import { ListItem, } from 'react-native-elements';
 import FontistoIcon from 'react-native-vector-icons/Fontisto';
-import { removePerson } from '../functions';
+import { addPerson, removePerson } from '../functions';
 
 function People() {
     const sqlite = React.useContext(SQLiteContext);
@@ -27,11 +34,78 @@ function People() {
     }
 
     return (
-        <FlatList
-            keyExtractor={(item) => item.id.toString()}
-            data={people.list}
-            renderItem={renderItem}
-        />
+        <>
+            <PeopleAddition/>
+            <FlatList
+                keyExtractor={(item) => item.id.toString()}
+                data={people.list}
+                renderItem={renderItem}
+            />
+        </>
+    )
+}
+
+type PeopleAdditionType = {
+    type: 'UPDATE_NAME',
+    payload: string,
+} | {
+    type: 'UPDATE_AGE',
+    payload: number,
+}
+
+function PeopleAddition() {
+    const sqlite = React.useContext(SQLiteContext);
+    const [state, dispatch] = React.useReducer((state: IPerson, action: PeopleAdditionType) => {
+        switch(action.type) {
+            default: return state;
+            case 'UPDATE_NAME':
+                return {
+                    ...state,
+                    name: action.payload,
+                }
+            case 'UPDATE_AGE':
+                return {
+                    ...state,
+                    age: action.payload,
+                }
+        }
+    }, {
+        name: '',
+        age: 0,
+    });
+
+    function add() {
+        if (!state.name || state.age < 0) {
+            ToastAndroid.show('Invalid params', ToastAndroid.SHORT);
+        } else {
+            addPerson(sqlite, state)
+                .then(() => {
+                    ToastAndroid.show('Add new person successful!', ToastAndroid.SHORT);
+                }).catch((error: Error) => {
+                    ToastAndroid.show(`Add new person failed: ${error.message}`, ToastAndroid.SHORT);
+                });
+        }
+    }
+
+    return (
+        <>
+            <View style={{ flexDirection: 'row' }}>
+                <TextInput
+                    value={state.name}
+                    placeholder='Name'
+                    onChangeText={(text: string) => dispatch({ type: 'UPDATE_NAME', payload: text })}
+                />
+                <TextInput
+                    keyboardType='numeric'
+                    value={String(state.age)}
+                    placeholder='Age'
+                    onChangeText={(text: string) => dispatch({ type: 'UPDATE_AGE', payload: text === '' ? 0 : Number(text) })}
+                />
+            </View>
+            <TouchableOpacity onPress={add}>
+                <Text>Add</Text>
+            </TouchableOpacity>
+        </>
     )
 }
 

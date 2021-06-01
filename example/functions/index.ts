@@ -30,10 +30,8 @@ export function addPerson(sqlite: IResponseSQLiteHelper, person: IPerson) {
 
 export function updatePerson(sqlite: IResponseSQLiteHelper, person: IPerson) {
     return new Promise((resolve: (value: boolean) => void, reject: (value?: Error) => void) => {
-        console.log(`UPDATE People SET name='${person.name}', age=${person.age} WHERE id=${person.id}`)
         sqlite.executeQuery(`UPDATE People SET name='${person.name}', age=${person.age} WHERE id=${person.id}`)
             .then((result) => {
-                console.log(result);
                 resolve(result.rowsAffected > 0);
             }).catch((error: Error) => reject(error));
     });

@@ -7,13 +7,19 @@
  */
 
 import React from 'react';
-import { View } from 'react-native';
+import People from './components/People';
+import { SQLiteContext, useSQLiteHelper } from './helpers';
 
 function App() {
+    const sqlite = useSQLiteHelper({
+        name: 'test.db',
+        aliasName: 'abc.db',
+    });
+
     return (
-        <View>
-            
-        </View>
+        <SQLiteContext.Provider value={sqlite}>
+            <People/>
+        </SQLiteContext.Provider>
     );
 };
 

@@ -9,10 +9,11 @@ import { Button, Input, ListItem, } from 'react-native-elements';
 import FontistoIcon from 'react-native-vector-icons/Fontisto';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { addPerson, removePerson, updatePerson } from '../functions';
+import { PeopleContext } from '../context-api/people-context-api';
 
 function People() {
     const sqlite = React.useContext(SQLiteContext);
-    const people = useGetPeople(sqlite);
+    const people = React.useContext(PeopleContext);
     const [updatingItem, setUpdatingItem] = React.useState<IPerson>();
 
     function renderItem({ item }: { item: IPerson }) {
@@ -36,7 +37,11 @@ function People() {
                         <FontistoIcon
                             name='trash'
                             size={30}
-                            onPress={() => removePerson(sqlite, item.id)}
+                            onPress={() => removePerson({
+                                sqlite,
+                                id: item.id,
+                                onSuccess: people.refresh,
+                            })}
                         />
                     )
                 }
@@ -63,19 +68,20 @@ function People() {
     )
 }
 
-type PeopleAdditionType = {
+type PeopleActionType = {
     type: 'UPDATE_NAME' | 'UPDATE_AGE',
     payload: string,
 };
 
-type PeopleAdditionStateType = {
+type PeopleStateType = {
     name: string;
     ageStr: string;
 }
 
 function PeopleAddition() {
     const sqlite = React.useContext(SQLiteContext);
-    const [state, dispatch] = React.useReducer((state: PeopleAdditionStateType, action: PeopleAdditionType) => {
+    const people = React.useContext(PeopleContext);
+    const [state, dispatch] = React.useReducer((state: PeopleStateType, action: PeopleActionType) => {
         switch(action.type) {
             default: return state;
             case 'UPDATE_NAME':
@@ -98,12 +104,15 @@ function PeopleAddition() {
         if (!state.name || !state.ageStr || Number(state.ageStr) <= 0) {
             ToastAndroid.show('Invalid params', ToastAndroid.SHORT);
         } else {
-            addPerson(sqlite, { age: Number(state.ageStr), name: state.name })
-                .then(() => {
-                    ToastAndroid.show('Add new person successful!', ToastAndroid.SHORT);
-                }).catch((error: Error) => {
-                    ToastAndroid.show(`Add new person failed: ${error.message}`, ToastAndroid.SHORT);
-                });
+            addPerson({
+                sqlite,
+                person: { age: Number(state.ageStr), name: state.name },
+                onSuccess: people.refresh,
+            }).then(() => {
+                ToastAndroid.show('Add new person successful!', ToastAndroid.SHORT);
+            }).catch((error: Error) => {
+                ToastAndroid.show(`Add new person failed: ${error.message}`, ToastAndroid.SHORT);
+            });
         }
     }
 
@@ -134,7 +143,8 @@ function PeopleAddition() {
 
 function PeopleUpdate({ person, onCancel }: { person: IPerson, onCancel: () => void }) {
     const sqlite = React.useContext(SQLiteContext);
-    const [state, dispatch] = React.useReducer((state: PeopleAdditionStateType, action: PeopleAdditionType) => {
+    const people = React.useContext(PeopleContext);
+    const [state, dispatch] = React.useReducer((state: PeopleStateType, action: PeopleActionType) => {
         switch(action.type) {
             default: return state;
             case 'UPDATE_NAME':
@@ -157,13 +167,16 @@ function PeopleUpdate({ person, onCancel }: { person: IPerson, onCancel: () => v
         if (!state.name || !state.ageStr || Number(state.ageStr) <= 0) {
             ToastAndroid.show('Invalid params', ToastAndroid.SHORT);
         } else {
-            updatePerson(sqlite, { id: person.id, age: Number(state.ageStr), name: state.name })
-                .then(() => {
-                    ToastAndroid.show('Update person successful!', ToastAndroid.SHORT);
-                    onCancel();
-                }).catch((error: Error) => {
-                    ToastAndroid.show(`'Update person failed: ${error.message}`, ToastAndroid.SHORT);
-                });
+            updatePerson({
+                sqlite,
+                person: { id: person.id, age: Number(state.ageStr), name: state.name },
+                onSuccess: people.refresh,
+            }).then(() => {
+                ToastAndroid.show('Update person successful!', ToastAndroid.SHORT);
+                onCancel();
+            }).catch((error: Error) => {
+                ToastAndroid.show(`'Update person failed: ${error.message}`, ToastAndroid.SHORT);
+            });
         }
     }
 

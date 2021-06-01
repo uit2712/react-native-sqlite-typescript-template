@@ -8,7 +8,9 @@
 
 import React from 'react';
 import People from './components/People';
+import { PeopleContext } from './context-api/people-context-api';
 import { SQLiteContext, useSQLiteHelper } from './helpers';
+import { useGetPeople } from './hooks';
 
 function App() {
     const sqlite = useSQLiteHelper({
@@ -16,9 +18,13 @@ function App() {
         aliasName: 'abc.db',
     });
 
+    const people = useGetPeople(sqlite);
+
     return (
         <SQLiteContext.Provider value={sqlite}>
-            <People/>
+            <PeopleContext.Provider value={people}>
+                <People/>
+            </PeopleContext.Provider>
         </SQLiteContext.Provider>
     );
 };

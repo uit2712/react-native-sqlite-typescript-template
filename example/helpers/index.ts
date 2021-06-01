@@ -24,15 +24,6 @@ function openDatabase(request: IRequestSQLiteHelper) {
     });
 }
 
-export interface IResponseSQLiteHelper {
-    isDatabaseOpened: boolean;
-    errorMessage: string;
-    isShouldRefresh: boolean;
-    closeDatabase: () => void;
-    executeQuery: <T>(query: string, ...args: any[]) => Promise<IExecuteQueryResult<T>>;
-    doneRefresh: () => void;
-}
-
 export interface IExecuteQueryResult<T> {
     insertedId: number;
     rowsAffected: number;
@@ -43,6 +34,13 @@ export interface IRequestSQLiteHelper {
     name: string;
     aliasName: string;
     location?: SQLite.Location;
+}
+
+export interface IResponseSQLiteHelper {
+    isDatabaseOpened: boolean;
+    errorMessage: string;
+    closeDatabase: () => void;
+    executeQuery: <T>(query: string, ...args: any[]) => Promise<IExecuteQueryResult<T>>;
 }
 
 export function useSQLiteHelper(request: IRequestSQLiteHelper): IResponseSQLiteHelper {
@@ -59,7 +57,6 @@ export function useSQLiteHelper(request: IRequestSQLiteHelper): IResponseSQLiteH
         setDatabase(null);
     }
 
-    const [isShouldRefresh, setIsShouldRefresh] = React.useState(false);
     function executeQuery<T>(query: string, ...args: any[]) {
         return new Promise((resolve: (value?: IExecuteQueryResult<T>) => void, reject: (value?: Error) => void) => {
             if (database && query) {
@@ -69,10 +66,6 @@ export function useSQLiteHelper(request: IRequestSQLiteHelper): IResponseSQLiteH
                             let list: T[] = [];
                             for (let i = 0; i < result[1].rows.length; i++) {
                                 list.push(result[1].rows.item(i));
-                            }
-
-                            if (result[1].rowsAffected > 0 || result[1].insertId > 0) {
-                                setIsShouldRefresh(true);
                             }
 
                             resolve({
@@ -102,20 +95,16 @@ export function useSQLiteHelper(request: IRequestSQLiteHelper): IResponseSQLiteH
         errorMessage,
         closeDatabase,
         executeQuery,
-        doneRefresh: () => setIsShouldRefresh(false),
-        isShouldRefresh,
     }
 }
 
 export const SQLiteContext = React.createContext<IResponseSQLiteHelper>({
     isDatabaseOpened: false,
     errorMessage: '',
-    isShouldRefresh: false,
     closeDatabase: () => {},
     executeQuery: <T>(query: string) => new Promise((resolve: (value?: IExecuteQueryResult<T>) => void) => resolve({
         insertedId: 0,
         rowsAffected: 0,
         list: [],
     })),
-    doneRefresh: () => {},
 });

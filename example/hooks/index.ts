@@ -1,4 +1,5 @@
 import React from 'react';
+import { getPeople } from '../functions';
 import { IResponseSQLiteHelper } from '../helpers';
 
 export interface IPerson {
@@ -12,9 +13,9 @@ export function useGetPeople(sqlite: IResponseSQLiteHelper) {
     const [errorMessage, setErrorMessage] = React.useState('');
     React.useEffect(() => {
         if (sqlite.isDatabaseOpened === true || sqlite.isShouldRefresh === true) {
-            sqlite.executeQuery<IPerson>('SELECT * FROM People')
+            getPeople(sqlite)
                 .then((result) => {
-                    setList(result.list);
+                    setList(result);
                     sqlite.doneRefresh();
                 }).catch((error: Error) => {
                     setErrorMessage(error.message);

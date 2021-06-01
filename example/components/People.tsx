@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SQLiteContext } from '../helpers';
 import { IPerson, useGetPeople } from '../hooks';
-import { ListItem, } from 'react-native-elements';
+import { Button, Input, ListItem, } from 'react-native-elements';
 import FontistoIcon from 'react-native-vector-icons/Fontisto';
 import { addPerson, removePerson } from '../functions';
 
@@ -46,16 +46,18 @@ function People() {
 }
 
 type PeopleAdditionType = {
-    type: 'UPDATE_NAME',
+    type: 'UPDATE_NAME' | 'UPDATE_AGE',
     payload: string,
-} | {
-    type: 'UPDATE_AGE',
-    payload: number,
+};
+
+type PeopleAdditionStateType = {
+    name: string;
+    ageStr: string;
 }
 
 function PeopleAddition() {
     const sqlite = React.useContext(SQLiteContext);
-    const [state, dispatch] = React.useReducer((state: IPerson, action: PeopleAdditionType) => {
+    const [state, dispatch] = React.useReducer((state: PeopleAdditionStateType, action: PeopleAdditionType) => {
         switch(action.type) {
             default: return state;
             case 'UPDATE_NAME':
@@ -66,19 +68,19 @@ function PeopleAddition() {
             case 'UPDATE_AGE':
                 return {
                     ...state,
-                    age: action.payload,
+                    ageStr: action.payload,
                 }
         }
     }, {
         name: '',
-        age: 0,
+        ageStr: '',
     });
 
     function add() {
-        if (!state.name || state.age < 0) {
+        if (!state.name || !state.ageStr || Number(state.ageStr) <= 0) {
             ToastAndroid.show('Invalid params', ToastAndroid.SHORT);
         } else {
-            addPerson(sqlite, state)
+            addPerson(sqlite, { age: Number(state.ageStr), name: state.name })
                 .then(() => {
                     ToastAndroid.show('Add new person successful!', ToastAndroid.SHORT);
                 }).catch((error: Error) => {
@@ -89,22 +91,25 @@ function PeopleAddition() {
 
     return (
         <>
-            <View style={{ flexDirection: 'row' }}>
-                <TextInput
-                    value={state.name}
-                    placeholder='Name'
-                    onChangeText={(text: string) => dispatch({ type: 'UPDATE_NAME', payload: text })}
-                />
-                <TextInput
-                    keyboardType='numeric'
-                    value={String(state.age)}
-                    placeholder='Age'
-                    onChangeText={(text: string) => dispatch({ type: 'UPDATE_AGE', payload: text === '' ? 0 : Number(text) })}
-                />
-            </View>
-            <TouchableOpacity onPress={add}>
-                <Text>Add</Text>
-            </TouchableOpacity>
+            <Input
+                value={state.name}
+                placeholder='Name'
+                onChangeText={(text: string) => dispatch({ type: 'UPDATE_NAME', payload: text })}
+            />
+            <Input
+                keyboardType='numeric'
+                value={state.ageStr}
+                placeholder='Age'
+                onChangeText={(text: string) => dispatch({ type: 'UPDATE_AGE', payload: text })}
+            />
+            <Button
+                title='Add'
+                type='solid'
+                style={{
+                    marginHorizontal: 10,
+                }}
+                onPress={add}
+            />
         </>
     )
 }
